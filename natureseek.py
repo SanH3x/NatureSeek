@@ -214,21 +214,31 @@ def cadastro():
 
 @app.route('/consulta')
 def consulta():
+    """Página de consulta de dados"""
     df = ler_dados()
     
-    filtro_cultivo = request.args.get('filtro_cultivo', '')
-    filtro_cidade = request.args.get('filtro_cidade', '')
+    # Filtros
+    filtro_cultivo = request.args.get('filtro_cultivo', '').strip()
+    filtro_praga = request.args.get('filtro_praga', '').strip()
     
-    if filtro_cultivo:
-        df = df[df['cultivo'].str.contains(filtro_cultivo, case=False, na=False)]
-    if filtro_cidade:
-        df = df[df['cidade'].str.contains(filtro_cidade, case=False, na=False)]
+    if not df.empty:
+        # Preencher valores NaN com string vazia
+        df = df.fillna({'cultivo': '', 'praga': ''})
+        
+        # Aplicar filtros case-insensitive
+        if filtro_cultivo:
+            df = df[df['cultivo'].str.lower().str.contains(filtro_cultivo.lower(), na=False)]
+        if filtro_praga:
+            df = df[df['praga'].str.lower().str.contains(filtro_praga.lower(), na=False)]
     
-    dados = df.to_dict('records')
+    # Converter para lista de dicionários para exibição
+    dados = df.to_dict('records') if not df.empty else []
     
-    return render_template('consulta.html', dados=dados, 
+    return render_template('consulta.html', 
+                         dados=dados, 
                          filtro_cultivo=filtro_cultivo, 
-                         filtro_cidade=filtro_cidade)
+                         filtro_cidade=filtro_praga)
+
 
 @app.route('/estatisticas')
 def estatisticas():

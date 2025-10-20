@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta - InteliAgro</title>
+    <title>Consulta - Sistema Agrícola</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -31,67 +31,103 @@
         <main>
             <!-- Filtros -->
             <div class="filtros">
-                <h3>Filtros</h3>
+                <h3>🔍 Filtros de Pesquisa</h3>
+                <p class="filtro-info">Os filtros não diferenciam letras maiúsculas de minúsculas</p>
+                
                 <form method="GET" class="form-filtros">
                     <div class="filtro-group">
                         <label for="filtro_cultivo">Filtrar por Cultivo:</label>
                         <input type="text" id="filtro_cultivo" name="filtro_cultivo" 
-                               value="{{ filtro_cultivo }}" placeholder="Digite o cultivo...">
+                               value="{{ filtro_cultivo }}" placeholder="Ex: soja, milho, trigo...">
+                        {% if filtro_cultivo %}
+                        <small class="filtro-ativo">Filtro ativo: "{{ filtro_cultivo }}"</small>
+                        {% endif %}
                     </div>
                     
                     <div class="filtro-group">
-                        <label for="filtro_cidade">Filtrar por Praga:</label>
+                        <label for="filtro_praga">Filtrar por praga:</label>
                         <input type="text" id="filtro_praga" name="filtro_praga" 
-                               value="{{ filtro_praga }}" placeholder="Digite a praga...">
+                               value="{{ filtro_praga }}" placeholder="Ex: Pulgões, Lagarta...">
+                        {% if filtro_praga %}
+                        <small class="filtro-ativo">Filtro ativo: "{{ filtro_praga }}"</small>
+                        {% endif %}
                     </div>
                     
-                    <button type="submit" class="btn">Aplicar Filtros</button>
-                    <a href="{{ url_for('consulta') }}" class="btn btn-secondary">Limpar Filtros</a>
+                    <div class="botoes-filtro">
+                        <button type="submit" class="btn btn-primary">
+                            🔍 Aplicar Filtros
+                        </button>
+                        <a href="{{ url_for('consulta') }}" class="btn btn-secondary">
+                            🗑️ Limpar Filtros
+                        </a>
+                    </div>
                 </form>
+
+                <!-- Mostrar filtros ativos -->
+                {% if filtro_cultivo or filtro_praga %}
+                <div class="filtros-ativos">
+                    <h4>Filtros Ativos:</h4>
+                    <ul>
+                        {% if filtro_cultivo %}
+                        <li>🌾 Cultivo contém: <strong>"{{ filtro_cultivo }}"</strong></li>
+                        {% endif %}
+                        {% if filtro_praga %}
+                        <li>🏙️ praga contém: <strong>"{{ filtro_praga }}"</strong></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Tabela de dados -->
             <div class="tabela-container">
-                <h3>Registros Cadastrados ({{ dados|length }} encontrados)</h3>
+                <h3>📊 Registros Encontrados ({{ dados|length }})</h3>
                 
                 {% if dados %}
-                <table class="tabela-dados">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Cultivo</th>
-                            <th>Praga</th>
-                            <th>Hectares</th>
-                            <th>Defensivo</th>
-                            <th>Cidade</th>
-                            <th>Data Cadastro</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for registro in dados %}
-                        <tr>
-                            <td>{{ registro.id }}</td>
-                            <td>{{ registro.cultivo }}</td>
-                            <td>{{ registro.praga }}</td>
-                            <td>{{ "%.2f"|format(registro.hectares) }}</td>
-                            <td>{{ registro.defensivo }}</td>
-                            <td>{{ registro.cidade }}</td>
-                            <td>{{ registro.data_cadastro }}</td>
-                            <td>
-                                <a href="{{ url_for('excluir', id=registro.id) }}" 
-                                   class="btn-excluir" 
-                                   onclick="return confirm('Tem certeza que deseja excluir este registro?')">
-                                    Excluir
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="tabela-dados">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cultivo</th>
+                                <th>Praga</th>
+                                <th>Hectares</th>
+                                <th>Defensivo</th>
+                                <th>praga</th>
+                                <th>Data Cadastro</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in dados %}
+                            <tr>
+                                <td>{{ registro.id }}</td>
+                                <td>{{ registro.cultivo }}</td>
+                                <td>{{ registro.praga }}</td>
+                                <td>{{ "%.2f"|format(registro.hectares|float) }} ha</td>
+                                <td>{{ registro.defensivo }}</td>
+                                <td>{{ registro.praga }}</td>
+                                <td>{{ registro.data_cadastro }}</td>
+                                <td>
+                                    <a href="{{ url_for('excluir', id=registro.id) }}" 
+                                       class="btn-excluir" 
+                                       onclick="return confirm('Tem certeza que deseja excluir este registro?')">
+                                        🗑️ Excluir
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
                 <div class="sem-dados">
-                    <p>Nenhum registro encontrado com os filtros aplicados.</p>
+                    <p>❌ Nenhum registro encontrado com os filtros aplicados.</p>
+                    {% if filtro_cultivo or filtro_praga %}
+                    <p>Tente ajustar os termos de pesquisa ou <a href="{{ url_for('consulta') }}">limpar os filtros</a>.</p>
+                    {% else %}
+                    <p>Nenhum dado cadastrado ainda. <a href="{{ url_for('cadastro') }}">Clique aqui para cadastrar o primeiro registro</a>.</p>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
