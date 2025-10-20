@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InteliAgro - Início</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌱 InteliAgro </h1>
+            <p>Controle de cultivos, pragas e defensivos agrícolas</p>
+        </header>
+
+        <nav class="menu">
+            <a href="{{ url_for('index') }}" class="active">Início</a>
+            <a href="{{ url_for('cadastro') }}">Cadastro</a>
+            <a href="{{ url_for('consulta') }}">Consulta</a>
+            <a href="{{ url_for('estatisticas') }}">Estatísticas</a>
+        </nav>
+
+        <main class="dashboard">
+            <div class="welcome">
+                <h2>Bem-vindo ao InteliAgro</h2>
+                <p>Gerencie suas informações agrícolas de forma eficiente e organizada.</p>
+            </div>
+
+            <div class="cards">
+                <div class="card">
+                    <h3>📝 Cadastro</h3>
+                    <p>Adicione novos registros de cultivos, pragas, defensivos e áreas plantadas.</p>
+                    <a href="{{ url_for('cadastro') }}" class="btn">Ir para Cadastro</a>
+                </div>
+
+                <div class="card">
+                    <h3>🔍 Consulta</h3>
+                    <p>Consulte e filtre os dados cadastrados no sistema.</p>
+                    <a href="{{ url_for('consulta') }}" class="btn">Ir para Consulta</a>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Estatísticas</h3>
+                    <p>Visualize análises e relatórios dos dados cadastrados.</p>
+                    <a href="{{ url_for('estatisticas') }}" class="btn">Ver Estatísticas</a>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 InteliAgro. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+</body>
+</html>
