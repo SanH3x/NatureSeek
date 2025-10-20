@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estatísticas - InteliAgro</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1.2">
 </head>
 <body>
     <div class="container">
@@ -19,6 +19,14 @@
             <a href="{{ url_for('consulta') }}">Consulta</a>
             <a href="{{ url_for('estatisticas') }}" class="active">Estatísticas</a>
         </nav>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         {% if mensagem %}
             <div class="alert alert-info">{{ mensagem }}</div>
@@ -43,12 +51,16 @@
                         <p class="numero">{{ "%.2f"|format(estatisticas.media_hectares) }}</p>
                     </div>
                     <div class="card-estatistica">
-                        <h3>Maior Área (ha)</h3>
-                        <p class="numero">{{ "%.2f"|format(estatisticas.maior_area) }}</p>
+                        <h3>Total de Cultivos</h3>
+                        <p class="numero">{{ estatisticas.total_cultivos }}</p>
                     </div>
                     <div class="card-estatistica">
-                        <h3>Menor Área (ha)</h3>
-                        <p class="numero">{{ "%.2f"|format(estatisticas.menor_area) }}</p>
+                        <h3>Total de Pragas</h3>
+                        <p class="numero">{{ estatisticas.total_pragas }}</p>
+                    </div>
+                    <div class="card-estatistica">
+                        <h3>Total de Defensivos</h3>
+                        <p class="numero">{{ estatisticas.total_defensivos }}</p>
                     </div>
                 </div>
             </section>
@@ -57,10 +69,52 @@
             <section class="frequencias">
                 <h2>🔍 Frequências Detalhadas</h2>
                 
+                <!-- Pragas Individuais -->
+                <div class="categoria-expansivel">
+                    <div class="categoria-header" onclick="toggleCategoria('pragas-individuais')">
+                        <h3>🐛 Frequência de Pragas (Individual)</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div id="pragas-individuais" class="categoria-content">
+                        {% if frequencias.pragas_individual %}
+                            <div class="subcategoria">
+                                <ul>
+                                    {% for praga, quantidade in frequencias.pragas_individual.items() %}
+                                    <li>{{ praga }}: <strong>{{ quantidade }}</strong> ocorrência(s)</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <p class="sem-dados">Nenhum dado disponível</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Defensivos Individuais -->
+                <div class="categoria-expansivel">
+                    <div class="categoria-header" onclick="toggleCategoria('defensivos-individuais')">
+                        <h3>🧪 Frequência de Defensivos (Individual)</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div id="defensivos-individuais" class="categoria-content">
+                        {% if frequencias.defensivos_individual %}
+                            <div class="subcategoria">
+                                <ul>
+                                    {% for defensivo, quantidade in frequencias.defensivos_individual.items() %}
+                                    <li>{{ defensivo }}: <strong>{{ quantidade }}</strong> uso(s)</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <p class="sem-dados">Nenhum dado disponível</p>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <!-- Pragas por Cultivo -->
                 <div class="categoria-expansivel">
                     <div class="categoria-header" onclick="toggleCategoria('pragas-cultivo')">
-                        <h3>🐛 Pragas por Cultivo</h3>
+                        <h3>🌾🐛 Pragas por Cultivo</h3>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div id="pragas-cultivo" class="categoria-content">
@@ -84,7 +138,7 @@
                 <!-- Defensivos por Cultivo -->
                 <div class="categoria-expansivel">
                     <div class="categoria-header" onclick="toggleCategoria('defensivos-cultivo')">
-                        <h3>🧪 Defensivos por Cultivo</h3>
+                        <h3>🌾🧪 Defensivos por Cultivo</h3>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div id="defensivos-cultivo" class="categoria-content">
@@ -108,7 +162,7 @@
                 <!-- Pragas por Defensivo -->
                 <div class="categoria-expansivel">
                     <div class="categoria-header" onclick="toggleCategoria('pragas-defensivo')">
-                        <h3>🐛 Pragas Tratadas por Defensivo</h3>
+                        <h3>🐛➡️🧪 Pragas Tratadas por Defensivo</h3>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div id="pragas-defensivo" class="categoria-content">
@@ -132,7 +186,7 @@
                 <!-- Defensivos por Praga -->
                 <div class="categoria-expansivel">
                     <div class="categoria-header" onclick="toggleCategoria('defensivos-praga')">
-                        <h3>🧪 Defensivos por Praga</h3>
+                        <h3>🐛⬅️🧪 Defensivos por Praga</h3>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div id="defensivos-praga" class="categoria-content">
@@ -164,39 +218,51 @@
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="cultivos" class="categoria-content">
-                            <ul>
-                                {% for cultivo, quantidade in totais.cultivos.items() %}
-                                <li>{{ cultivo }}: <strong>{{ quantidade }}</strong> registro(s)</li>
-                                {% endfor %}
-                            </ul>
+                            {% if totais.cultivos %}
+                                <ul>
+                                    {% for cultivo, quantidade in totais.cultivos.items() %}
+                                    <li>{{ cultivo }}: <strong>{{ quantidade }}</strong> registro(s)</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="sem-dados">Nenhum dado disponível</p>
+                            {% endif %}
                         </div>
                     </div>
 
                     <div class="categoria-expansivel">
                         <div class="categoria-header" onclick="toggleCategoria('pragas')">
-                            <h3>🐛 Pragas</h3>
+                            <h3>🐛 Pragas (Únicas)</h3>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="pragas" class="categoria-content">
-                            <ul>
-                                {% for praga, quantidade in totais.pragas.items() %}
-                                <li>{{ praga }}: <strong>{{ quantidade }}</strong> ocorrência(s)</li>
-                                {% endfor %}
-                            </ul>
+                            {% if totais.pragas_unicas %}
+                                <ul>
+                                    {% for praga, quantidade in totais.pragas_unicas.items() %}
+                                    <li>{{ praga }}: <strong>{{ quantidade }}</strong> ocorrência(s)</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="sem-dados">Nenhum dado disponível</p>
+                            {% endif %}
                         </div>
                     </div>
 
                     <div class="categoria-expansivel">
                         <div class="categoria-header" onclick="toggleCategoria('defensivos')">
-                            <h3>🧪 Defensivos</h3>
+                            <h3>🧪 Defensivos (Únicos)</h3>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="defensivos" class="categoria-content">
-                            <ul>
-                                {% for defensivo, quantidade in totais.defensivos.items() %}
-                                <li>{{ defensivo }}: <strong>{{ quantidade }}</strong> uso(s)</li>
-                                {% endfor %}
-                            </ul>
+                            {% if totais.defensivos_unicos %}
+                                <ul>
+                                    {% for defensivo, quantidade in totais.defensivos_unicos.items() %}
+                                    <li>{{ defensivo }}: <strong>{{ quantidade }}</strong> uso(s)</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="sem-dados">Nenhum dado disponível</p>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -206,11 +272,15 @@
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="cidades" class="categoria-content">
-                            <ul>
-                                {% for cidade, quantidade in totais.cidades.items() %}
-                                <li>{{ cidade }}: <strong>{{ quantidade }}</strong> registro(s)</li>
-                                {% endfor %}
-                            </ul>
+                            {% if totais.cidades %}
+                                <ul>
+                                    {% for cidade, quantidade in totais.cidades.items() %}
+                                    <li>{{ cidade }}: <strong>{{ quantidade }}</strong> registro(s)</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="sem-dados">Nenhum dado disponível</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -224,11 +294,13 @@
             const content = document.getElementById(id);
             const icon = content.previousElementSibling.querySelector('.toggle-icon');
             
-            if (content.style.display === 'block') {
-                content.style.display = 'none';
+            if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                content.style.maxHeight = '0px';
+                content.style.padding = '0';
                 icon.textContent = '▼';
             } else {
-                content.style.display = 'block';
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.style.padding = '1.5rem';
                 icon.textContent = '▲';
             }
         }
@@ -237,7 +309,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             const categorias = document.querySelectorAll('.categoria-content');
             categorias.forEach(categoria => {
-                categoria.style.display = 'none';
+                categoria.style.maxHeight = '0px';
+                categoria.style.padding = '0';
             });
         });
     </script>
