@@ -1,0 +1,21 @@
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t registry.gitlab.com/$CI_PROJECT_PATH:latest .
+    - docker push registry.gitlab.com/$CI_PROJECT_PATH:latest
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy realizado com sucesso!"
+  only:
+    - main
