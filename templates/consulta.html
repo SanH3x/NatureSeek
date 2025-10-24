@@ -1,52 +1,109 @@
-<!-- Tabela de dados -->
-<div class="tabela-container">
-    <h3>📊 Registros Encontrados ({{ dados|length }})</h3>
-    
-    {% if dados %}
-    <div class="table-responsive">
-        <table class="tabela-dados">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Cultivo</th>
-                    <th>Praga</th>
-                    <th>Hectares</th>
-                    <th>Defensivo</th>
-                    <th>Cidade</th>
-                    <th>Data Cadastro</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for registro in dados %}
-                <tr>
-                    <td>{{ registro.id }}</td>
-                    <td>{{ registro.cultivo }}</td>
-                    <td>{{ registro.praga }}</td>
-                    <td>{{ "%.2f"|format(registro.hectares|float) }} ha</td>
-                    <td>{{ registro.defensivo }}</td>
-                    <td>{{ registro.cidade_plantio }}</td>  <!-- CORRIGIDO: cidade para cidade_plantio -->
-                    <td>{{ registro.data_cadastro }}</td>
-                    <td>
-                        <a href="{{ url_for('excluir', id=registro.id) }}" 
-                           class="btn-excluir" 
-                           onclick="return confirm('Tem certeza que deseja excluir este registro?')">
-                            🗑️ Excluir
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta - InteliAgro</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Consulta de Dados</h1>
+            <a href="{{ url_for('index') }}" class="btn btn-voltar">← Voltar para Início</a>
+        </header>
+
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Início</a>
+            <a href="{{ url_for('cadastro') }}">Cadastro</a>
+            <a href="{{ url_for('consulta') }}" class="active">Consulta</a>
+            <a href="{{ url_for('estatisticas') }}">Estatísticas</a>
+        </nav>
+
+        <!-- Filtros -->
+        <div class="filtros">
+            <h3>Filtrar Dados</h3>
+            <form method="GET" class="form-filtros">
+                <div class="filtro-group">
+                    <label for="cultivo">Cultivo:</label>
+                    <input type="text" id="cultivo" name="cultivo" 
+                           value="{{ filtro_cultivo or '' }}" 
+                           placeholder="Filtrar por cultivo...">
+                </div>
+
+                <div class="filtro-group">
+                    <label for="praga">Praga:</label>
+                    <input type="text" id="praga" name="praga" 
+                           value="{{ filtro_praga or '' }}" 
+                           placeholder="Filtrar por praga...">
+                </div>
+
+                <div class="filtro-group">
+                    <label for="cidade">Cidade:</label>
+                    <input type="text" id="cidade" name="cidade" 
+                           value="{{ filtro_cidade or '' }}" 
+                           placeholder="Filtrar por cidade...">
+                </div>
+
+                <div class="filtro-group">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{{ url_for('consulta') }}" class="btn btn-secondary">Limpar</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabela de dados -->
+        <div class="tabela-container">
+            <h3>📊 Registros Encontrados ({{ dados|length }})</h3>
+            
+            {% if dados %}
+            <div class="table-responsive">
+                <table class="tabela-dados">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cultivo</th>
+                            <th>Praga</th>
+                            <th>Hectares</th>
+                            <th>Defensivo</th>
+                            <th>Cidade</th>
+                            <th>Data Cadastro</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for registro in dados %}
+                        <tr>
+                            <td>{{ registro.id }}</td>
+                            <td>{{ registro.cultivo }}</td>
+                            <td>{{ registro.praga }}</td>
+                            <td>{{ "%.2f"|format(registro.hectares|float) }} ha</td>
+                            <td>{{ registro.defensivo }}</td>
+                            <td>{{ registro.cidade_plantio }}</td>
+                            <td>{{ registro.data_cadastro.strftime('%d/%m/%Y') if registro.data_cadastro else 'N/A' }}</td>
+                            <td>
+                                <a href="{{ url_for('excluir', id=registro.id) }}" 
+                                   class="btn-excluir" 
+                                   onclick="return confirm('Tem certeza que deseja excluir o registro #{{ registro.id }}?')">
+                                    🗑️ Excluir
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="sem-dados">
+                <p>❌ Nenhum registro encontrado com os filtros aplicados.</p>
+                {% if filtro_cultivo or filtro_praga or filtro_cidade %}
+                <p>Tente ajustar os termos de pesquisa ou <a href="{{ url_for('consulta') }}" class="btn btn-secondary">limpar os filtros</a>.</p>
+                {% else %}
+                <p>Nenhum dado cadastrado ainda. <a href="{{ url_for('cadastro') }}" class="btn btn-primary">Cadastrar primeiro registro</a></p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
     </div>
-    {% else %}
-    <div class="sem-dados">
-        <p>❌ Nenhum registro encontrado com os filtros aplicados.</p>
-        {% if filtro_cultivo or filtro_praga %}
-        <p>Tente ajustar os termos de pesquisa ou <a href="{{ url_for('consulta') }}">limpar os filtros</a>.</p>
-        {% else %}
-        <p>Nenhum dado cadastrado ainda. <a href="{{ url_for('cadastro') }}">Clique aqui para cadastrar o primeiro registro</a>.</p>
-        {% endif %}
-    </div>
-    {% endif %}
-</div>
+</body>
+</html>

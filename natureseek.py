@@ -1,177 +1,39 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-import pandas as pd
+import csv
 import os
 from datetime import datetime
-from collections import Counter
-import numpy as np
+from pathlib import Path
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'chave-desenvolvimento')
+app.secret_key = 'sua_chave_secreta_aqui'
 
-# Configurações
-ARQUIVO_CSV = 'dados_agricolas.csv'
+# Configuração
+CSV_FILE = 'dados_agricolas.csv'
+CSV_HEADERS = ['cultivo', 'praga', 'hectares', 'defensivo', 'cidade_plantio', 'data_cadastro']
 
-def inicializar_csv():
-    """Inicializa o arquivo CSV com cabeçalhos se não existir"""
-    if not os.path.exists(ARQUIVO_CSV):
-        df = pd.DataFrame(columns=[
-            'id', 'cultivo', 'praga', 'hectares', 'defensivo', 
-            'cidade', 'data_cadastro'
-        ])
-        df.to_csv(ARQUIVO_CSV, index=False, encoding='utf-8')
+def init_csv():
+    """Inicializa o arquivo CSV se não existir"""
+    if not os.path.exists(CSV_FILE):
+        with open(CSV_FILE, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=CSV_HEADERS)
+            writer.writeheader()
 
-def gerar_id():
-    """Gera um ID único para cada registro"""
+
+def read_csv():
+    """Lê todos os dados do CSV"""
     try:
-        df = ler_dados()
-        if len(df) == 0:
-            return 1
-        return df['id'].max() + 1
+        with open(CSV_FILE, 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            return list(reader)
     except:
-        return 1
-
-def salvar_dados(dados):
-    """Salva os dados no CSV"""
-    df = ler_dados()
-    novo_registro = pd.DataFrame([dados])
-    df = pd.concat([df, novo_registro], ignore_index=True)
-    df.to_csv(ARQUIVO_CSV, index=False, encoding='utf-8')
-
-def ler_dados():
-    """Lê todos os dados do CSV com tratamento de erros"""
-    try:
-        # Tenta ler com encoding utf-8 primeiro
-        df = pd.read_csv(ARQUIVO_CSV, encoding='utf-8')
-    except UnicodeDecodeError:
-        try:
-            # Se falhar, tenta latin-1
-            df = pd.read_csv(ARQUIVO_CSV, encoding='latin-1')
-        except:
-            # Se ainda falhar, cria DataFrame vazio
-            df = pd.DataFrame(columns=[
-                'id', 'cultivo', 'praga', 'hectares', 'defensivo', 
-                'cidade', 'data_cadastro'
-            ])
-    except FileNotFoundError:
-        # Se o arquivo não existir, cria DataFrame vazio
-        df = pd.DataFrame(columns=[
-            'id', 'cultivo', 'praga', 'hectares', 'defensivo', 
-            'cidade', 'data_cadastro'
-        ])
-    except Exception as e:
-        print(f"Erro ao ler CSV: {e}")
-        df = pd.DataFrame(columns=[
-            'id', 'cultivo', 'praga', 'hectares', 'defensivo', 
-            'cidade', 'data_cadastro'
-        ])
-    
-    # Garantir que os tipos de dados estão corretos
-    if not df.empty:
-        df['id'] = pd.to_numeric(df['id'], errors='coerce').fillna(0).astype(int)
-        df['hectares'] = pd.to_numeric(df['hectares'], errors='coerce').fillna(0.0)
-        
-        # Limpar strings - remover espaços extras e garantir encoding
-        string_columns = ['cultivo', 'praga', 'defensivo', 'cidade']
-        for col in string_columns:
-            if col in df.columns:
-                df[col] = df[col].astype(str).str.strip().str.title()
-    
-    return df
-
-def processar_lista_string(texto):
-    """Processa strings que podem conter múltiplos valores separados por vírgula"""
-    if pd.isna(texto) or texto == 'nan':
         return []
-    
-    texto = str(texto).strip()
-    if not texto:
-        return []
-    
-    # Divide por vírgula e remove espaços extras
-    itens = [item.strip() for item in texto.split(',')]
-    # Filtra itens vazios e aplica title case
-    return [item.title() for item in itens if item]
 
-def calcular_frequencias_pragas_defensivos(df):
-    """Calcula a frequência de pragas e defensivos, tratando valores múltiplos"""
-    frequencias = {
-        'pragas_por_cultivo': {},
-        'defensivos_por_cultivo': {},
-        'pragas_por_defensivo': {},
-        'defensivos_por_praga': {},
-        'pragas_individual': {},
-        'defensivos_individual': {}
-    }
-    
-    if df.empty:
-        return frequencias
-    
-    # Listas para armazenar todos os itens individuais
-    todas_pragas = []
-    todos_defensivos = []
-    
-    # Processar cada linha para extrair pragas e defensivos individuais
-    for _, row in df.iterrows():
-        cultivo = str(row['cultivo']).strip().title() if pd.notna(row['cultivo']) else 'Desconhecido'
-        
-        # Processar pragas (pode ser string única ou múltiplas separadas por vírgula)
-        pragas = processar_lista_string(row['praga'])
-        todas_pragas.extend(pragas)
-        
-        # Processar defensivos (pode ser string única ou múltiplas separadas por vírgula)
-        defensivos = processar_lista_string(row['defensivo'])
-        todos_defensivos.extend(defensivos)
-        
-        # Adicionar ao dicionário de pragas por cultivo
-        if cultivo not in frequencias['pragas_por_cultivo']:
-            frequencias['pragas_por_cultivo'][cultivo] = {}
-        
-        for praga in pragas:
-            if praga in frequencias['pragas_por_cultivo'][cultivo]:
-                frequencias['pragas_por_cultivo'][cultivo][praga] += 1
-            else:
-                frequencias['pragas_por_cultivo'][cultivo][praga] = 1
-        
-        # Adicionar ao dicionário de defensivos por cultivo
-        if cultivo not in frequencias['defensivos_por_cultivo']:
-            frequencias['defensivos_por_cultivo'][cultivo] = {}
-        
-        for defensivo in defensivos:
-            if defensivo in frequencias['defensivos_por_cultivo'][cultivo]:
-                frequencias['defensivos_por_cultivo'][cultivo][defensivo] += 1
-            else:
-                frequencias['defensivos_por_cultivo'][cultivo][defensivo] = 1
-    
-    # Calcular frequências individuais
-    frequencias['pragas_individual'] = dict(Counter(todas_pragas))
-    frequencias['defensivos_individual'] = dict(Counter(todos_defensivos))
-    
-    # Calcular pragas por defensivo e defensivos por praga
-    for _, row in df.iterrows():
-        pragas = processar_lista_string(row['praga'])
-        defensivos = processar_lista_string(row['defensivo'])
-        
-        for defensivo in defensivos:
-            if defensivo not in frequencias['pragas_por_defensivo']:
-                frequencias['pragas_por_defensivo'][defensivo] = {}
-            
-            for praga in pragas:
-                if praga in frequencias['pragas_por_defensivo'][defensivo]:
-                    frequencias['pragas_por_defensivo'][defensivo][praga] += 1
-                else:
-                    frequencias['pragas_por_defensivo'][defensivo][praga] = 1
-        
-        for praga in pragas:
-            if praga not in frequencias['defensivos_por_praga']:
-                frequencias['defensivos_por_praga'][praga] = {}
-            
-            for defensivo in defensivos:
-                if defensivo in frequencias['defensivos_por_praga'][praga]:
-                    frequencias['defensivos_por_praga'][praga][defensivo] += 1
-                else:
-                    frequencias['defensivos_por_praga'][praga][defensivo] = 1
-    
-    return frequencias
+def write_csv(data):
+    """Escreve dados no CSV"""
+    with open(CSV_FILE, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=CSV_HEADERS)
+        writer.writeheader()
+        writer.writerows(data)
 
 @app.route('/')
 def index():
@@ -180,33 +42,45 @@ def index():
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
+        cultivo = request.form['cultivo'].strip()
+        praga = request.form['praga'].strip()
+        hectares = request.form['hectares'].strip()
+        defensivo = request.form['defensivo'].strip()
+        cidade = request.form['cidade'].strip()
+        
         try:
-            # Processar campos que podem ter múltiplos valores
-            cultivo = request.form['cultivo'].strip().title()
-            praga = request.form['praga'].strip().title()  # Pode conter vírgulas
-            defensivo = request.form['defensivo'].strip().title()  # Pode conter vírgulas
-            cidade = request.form['cidade'].strip().title()
+            # Validar dados
+            if not all([cultivo, praga, hectares, defensivo, cidade]):
+                flash('Todos os campos são obrigatórios!', 'error')
+                return render_template('cadastro.html')
             
-            dados = {
-                'id': gerar_id(),
+            hectares_float = float(hectares)
+            if hectares_float <= 0:
+                flash('Hectares deve ser maior que zero!', 'error')
+                return render_template('cadastro.html')
+            
+            # Ler dados existentes
+            dados_existentes = read_csv()
+            
+            # Novo registro
+            novo_registro = {
                 'cultivo': cultivo,
                 'praga': praga,
-                'hectares': float(request.form['hectares']),
+                'hectares': hectares_float,
                 'defensivo': defensivo,
-                'cidade': cidade,
+                'cidade_plantio': cidade,
                 'data_cadastro': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
             
-            if dados['hectares'] <= 0:
-                flash('A área em hectares deve ser maior que zero!', 'error')
-                return render_template('cadastro.html')
+            # Adicionar e salvar
+            dados_existentes.append(novo_registro)
+            write_csv(dados_existentes)
             
-            salvar_dados(dados)
-            flash('Cadastro realizado com sucesso!', 'success')
+            flash('Registro cadastrado com sucesso!', 'success')
             return redirect(url_for('cadastro'))
             
         except ValueError:
-            flash('Por favor, insira valores válidos para hectares!', 'error')
+            flash('Hectares deve ser um número válido!', 'error')
         except Exception as e:
             flash(f'Erro ao cadastrar: {str(e)}', 'error')
     
@@ -214,122 +88,107 @@ def cadastro():
 
 @app.route('/consulta')
 def consulta():
-    filtro_cultivo = request.args.get('filtro_cultivo', '')
-    filtro_praga = request.args.get('filtro_praga', '')
-    
-    query = "SELECT * FROM registros_agricolas WHERE 1=1"
-    params = []
-    
-    if filtro_cultivo:
-        query += " AND cultivo LIKE ?"
-        params.append(f'%{filtro_cultivo}%')
-    
-    if filtro_praga:
-        query += " AND praga LIKE ?"
-        params.append(f'%{filtro_praga}%')
-    
-    query += " ORDER BY data_cadastro DESC"
-    
-    conn = sqlite3.connect('agricultura.db')
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute(query, params)
-    dados = cursor.fetchall()
-    conn.close()
-    
-    return render_template('consulta.html', 
-                         dados=dados,
-                         filtro_cultivo=filtro_cultivo,
-                         filtro_praga=filtro_praga)
-
-
-@app.route('/estatisticas')
-def estatisticas():
-    df = ler_dados()
-    
-    if len(df) == 0:
-        return render_template('estatisticas.html', 
-                             estatisticas=None, 
-                             totais=None,
-                             frequencias=None,
-                             mensagem="Nenhum dado cadastrado para análise.")
-    
     try:
-        # Estatísticas gerais
-        estatisticas_gerais = {
-            'total_registros': len(df),
-            'total_hectares': df['hectares'].sum(),
-            'media_hectares': df['hectares'].mean(),
-            'maior_area': df['hectares'].max(),
-            'menor_area': df['hectares'].min(),
-            'total_cultivos': df['cultivo'].nunique(),
-            'total_cidades': df['cidade'].nunique()
-        }
+        filtro_cultivo = request.args.get('cultivo', '').strip()
+        filtro_praga = request.args.get('praga', '').strip()
+        filtro_cidade = request.args.get('cidade', '').strip()
         
-        # Calcular totais de pragas e defensivos únicos (considerando valores múltiplos)
-        todas_pragas = []
-        todos_defensivos = []
+        # Ler todos os dados
+        dados = read_csv()
         
-        for _, row in df.iterrows():
-            pragas = processar_lista_string(row['praga'])
-            defensivos = processar_lista_string(row['defensivo'])
-            todas_pragas.extend(pragas)
-            todos_defensivos.extend(defensivos)
+        # Aplicar filtros
+        dados_filtrados = []
+        for registro in dados:
+            cultivo_match = not filtro_cultivo or filtro_cultivo.lower() in registro['cultivo'].lower()
+            praga_match = not filtro_praga or filtro_praga.lower() in registro['praga'].lower()
+            cidade_match = not filtro_cidade or filtro_cidade.lower() in registro['cidade_plantio'].lower()
+            
+            if cultivo_match and praga_match and cidade_match:
+                dados_filtrados.append(registro)
         
-        estatisticas_gerais['total_pragas'] = len(set(todas_pragas))
-        estatisticas_gerais['total_defensivos'] = len(set(todos_defensivos))
-        
-        # Contagens por categoria (para valores únicos)
-        totais = {
-            'cultivos': df['cultivo'].value_counts().to_dict(),
-            'cidades': df['cidade'].value_counts().to_dict(),
-            'pragas_unicas': dict(Counter(todas_pragas)),
-            'defensivos_unicos': dict(Counter(todos_defensivos))
-        }
-        
-        # Frequências detalhadas
-        frequencias = calcular_frequencias_pragas_defensivos(df)
-        
-        # Debug: imprimir algumas informações
-        print(f"Total de registros: {len(df)}")
-        print(f"Pragas encontradas: {set(todas_pragas)}")
-        print(f"Defensivos encontrados: {set(todos_defensivos)}")
-        
-        return render_template('estatisticas.html', 
-                             estatisticas=estatisticas_gerais,
-                             totais=totais,
-                             frequencias=frequencias)
-    
+        return render_template('consulta.html', 
+                             dados=dados_filtrados,
+                             filtro_cultivo=filtro_cultivo,
+                             filtro_praga=filtro_praga,
+                             filtro_cidade=filtro_cidade)
+                             
     except Exception as e:
-        print(f"Erro ao calcular estatísticas: {e}")
-        flash(f'Erro ao calcular estatísticas: {str(e)}', 'error')
-        return render_template('estatisticas.html', 
-                             estatisticas=None, 
-                             totais=None,
-                             frequencias=None)
+        flash(f'Erro na consulta: {str(e)}', 'error')
+        return render_template('consulta.html', dados=[], 
+                             filtro_cultivo='', filtro_praga='', filtro_cidade='')
 
 @app.route('/excluir/<int:id>')
 def excluir(id):
     try:
-        df = ler_dados()
-        df = df[df['id'] != id]
-        df.to_csv(ARQUIVO_CSV, index=False, encoding='utf-8')
-        flash('Registro excluído com sucesso!', 'success')
+        # Ler dados existentes
+        dados = read_csv()
+        
+        # Filtrar excluindo o ID
+        dados_atualizados = [row for row in dados if int(row['id']) != id]
+        
+        # Verificar se algum registro foi removido
+        if len(dados_atualizados) == len(dados):
+            flash('Registro não encontrado!', 'error')
+        else:
+            write_csv(dados_atualizados)
+            flash('Registro excluído com sucesso!', 'success')
+            
     except Exception as e:
-        flash(f'Erro ao excluir registro: {str(e)}', 'error')
+        flash(f'Erro ao excluir: {str(e)}', 'error')
     
     return redirect(url_for('consulta'))
 
+@app.route('/estatisticas')
+def estatisticas():
+    try:
+        dados = read_csv()
+        
+        if not dados:
+            return render_template('estatisticas.html', totais={})
+        
+        # Calcular estatísticas
+        total_registros = len(dados)
+        total_hectares = sum(float(row['hectares']) for row in dados)
+        
+        # Distribuição por cultivo
+        cultivos = {}
+        for row in dados:
+            cultivo = row['cultivo']
+            cultivos[cultivo] = cultivos.get(cultivo, 0) + 1
+        
+        # Pragas únicas
+        pragas_unicas = {}
+        for row in dados:
+            praga = row['praga']
+            pragas_unicas[praga] = pragas_unicas.get(praga, 0) + 1
+        
+        # Defensivos únicos
+        defensivos_unicos = {}
+        for row in dados:
+            defensivo = row['defensivo']
+            defensivos_unicos[defensivo] = defensivos_unicos.get(defensivo, 0) + 1
+        
+        # Cidades
+        cidades = {}
+        for row in dados:
+            cidade = row['cidade_plantio']
+            cidades[cidade] = cidades.get(cidade, 0) + 1
+        
+        totais = {
+            'total_registros': total_registros,
+            'total_hectares': total_hectares,
+            'cultivos': cultivos,
+            'pragas_unicas': pragas_unicas,
+            'defensivos_unicos': defensivos_unicos,
+            'cidades': cidades
+        }
+        
+        return render_template('estatisticas.html', totais=totais)
+        
+    except Exception as e:
+        flash(f'Erro ao carregar estatísticas: {str(e)}', 'error')
+        return render_template('estatisticas.html', totais={})
+
 if __name__ == '__main__':
-    # Criar pastas necessárias
-    if not os.path.exists('templates'):
-        os.makedirs('templates')
-    if not os.path.exists('static'):
-        os.makedirs('static')
-    
-    inicializar_csv()
-    
-    port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('DEBUG', 'False').lower() == 'true'
-    
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    init_csv()
+    app.run(debug=True)

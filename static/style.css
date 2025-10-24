@@ -1,3 +1,4 @@
+/* style.css - Versão Corrigida com Accordion Exclusivo */
 * {
     margin: 0;
     padding: 0;
@@ -9,12 +10,14 @@ body {
     line-height: 1.6;
     color: #333;
     background-color: #f8f9fa;
+    padding: 0;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    min-height: 100vh;
 }
 
 /* Header */
@@ -162,9 +165,12 @@ input:focus, select:focus, textarea:focus {
 }
 
 .btn-voltar {
+    background: #757575;
     color: white;
     text-decoration: none;
     font-weight: 500;
+    display: inline-block;
+    margin-top: 1rem;
 }
 
 .btn-excluir {
@@ -254,99 +260,7 @@ input:focus, select:focus, textarea:focus {
     min-width: 200px;
 }
 
-/* Estilos para categorias expansíveis */
-.categoria-expansivel {
-    background: white;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-.categoria-header {
-    padding: 1.5rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    transition: background-color 0.3s ease;
-}
-
-.categoria-header:hover {
-    background: linear-gradient(135deg, #e8f5e8, #d4edda);
-}
-
-.categoria-header h3 {
-    margin: 0;
-    color: #2e7d32;
-    font-size: 1.2rem;
-}
-
-.toggle-icon {
-    font-size: 0.8rem;
-    color: #666;
-    transition: transform 0.3s ease;
-}
-
-.categoria-content {
-    padding: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
-}
-
-.categoria-content.active {
-    padding: 1.5rem;
-    max-height: 500px;
-}
-
-.subcategoria {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #4caf50;
-}
-
-.subcategoria h4 {
-    margin: 0 0 0.5rem 0;
-    color: #2e7d32;
-    font-size: 1.1rem;
-}
-
-.subcategoria ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.subcategoria li {
-    padding: 0.3rem 0;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.subcategoria li:last-child {
-    border-bottom: none;
-}
-
-/* Grid para distribuição */
-.categorias-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-/* Frequências */
-.frequencias {
-    margin: 2rem 0;
-}
-
-.frequencias .categoria-expansivel {
-    margin-bottom: 1rem;
-}
-
-/* Estatísticas melhoradas */
+/* Estatísticas */
 .cards-estatisticas {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -377,12 +291,152 @@ input:focus, select:focus, textarea:focus {
     color: #2e7d32;
 }
 
-/* Sem dados */
+/* Distribuição */
+.distribuicao {
+    margin: 2rem 0;
+}
+
+.distribuicao h2 {
+    color: #2e7d32;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    text-align: center;
+}
+
+.categorias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* REMOVIDAS AS REGRAS ANTIGAS DO ACCORDION */
+/* Substituídas pelas novas regras abaixo */
+
+/* NOVO ACCORDION EXCLUSIVO */
+.categoria-accordion {
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.accordion-input {
+    display: none;
+}
+
+.categoria-accordion .categoria-summary {
+    padding: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    transition: all 0.3s ease;
+    margin: 0;
+}
+
+.categoria-accordion .categoria-summary:hover {
+    background: linear-gradient(135deg, #e8f5e8, #d4edda);
+}
+
+.accordion-input:checked + .categoria-summary {
+    background: linear-gradient(135deg, #2e7d32, #4caf50);
+}
+
+.accordion-input:checked + .categoria-summary h3 {
+    color: white;
+}
+
+.accordion-input:checked + .categoria-summary .toggle-icon {
+    color: white;
+    transform: rotate(180deg);
+}
+
+.categoria-accordion .categoria-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0 1.5rem;
+}
+
+.accordion-input:checked + .categoria-summary + .categoria-content {
+    padding: 1.5rem;
+    max-height: 1000px;
+}
+
+/* Melhorias visuais para o accordion */
+.categoria-accordion .categoria-summary h3 {
+    margin: 0;
+    color: #2e7d32;
+    font-size: 1.3rem;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.categoria-accordion .toggle-icon {
+    font-size: 1rem;
+    color: #666;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+/* Listas dentro do accordion */
+.categoria-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.categoria-content li {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #4caf50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.categoria-content li:hover {
+    background: #e8f5e8;
+    transform: translateX(5px);
+}
+
+.categoria-content li:last-child {
+    margin-bottom: 0;
+}
+
+.contador {
+    background: #4caf50;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-left: 0.5rem;
+}
+
+.accordion-input:checked + .categoria-summary .contador {
+    background: rgba(255,255,255,0.3);
+}
+
+/* Estados vazios */
 .sem-dados {
     text-align: center;
     padding: 2rem;
     color: #666;
     font-style: italic;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #e0e0e0;
 }
 
 /* Footer */
@@ -433,125 +487,41 @@ footer {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
     
-    .categoria-header {
-        padding: 1rem;
+    .categoria-accordion .categoria-summary {
+        padding: 1.2rem;
     }
     
-    .categoria-header h3 {
-        font-size: 1rem;
-    }
-}
-/* Accordion melhorado com HTML5 details/summary */
-.categoria-details {
-    background: white;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.categoria-details[open] {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.categoria-summary {
-    padding: 1.5rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    transition: all 0.3s ease;
-    list-style: none; /* Remove marcador padrão */
-    position: relative;
-}
-
-/* Remove o marcador padrão do summary no Webkit */
-.categoria-summary::-webkit-details-marker {
-    display: none;
-}
-
-.categoria-summary:hover {
-    background: linear-gradient(135deg, #e8f5e8, #d4edda);
-}
-
-.categoria-details[open] .categoria-summary {
-    background: linear-gradient(135deg, #4caf50, #66bb6a);
-}
-
-.categoria-details[open] .categoria-summary h3 {
-    color: white;
-}
-
-.categoria-details[open] .toggle-icon {
-    color: white;
-    transform: rotate(180deg);
-}
-
-.categoria-summary h3 {
-    margin: 0;
-    color: #2e7d32;
-    font-size: 1.2rem;
-    transition: color 0.3s ease;
-}
-
-.toggle-icon {
-    font-size: 0.8rem;
-    color: #666;
-    transition: all 0.3s ease;
-}
-
-.categoria-content {
-    padding: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
-}
-
-.categoria-details[open] .categoria-content {
-    padding: 1.5rem;
-    max-height: 500px;
-}
-
-/* Animações suaves */
-.categoria-details {
-    animation: fadeInUp 0.5s ease;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Efeito de hover mais suave */
-.categoria-details:hover {
-    transform: translateY(-2px);
-    transition: transform 0.2s ease;
-}
-
-/* Melhorias para mobile */
-@media (max-width: 768px) {
-    .categoria-summary {
-        padding: 1rem;
+    .categoria-accordion .categoria-summary h3 {
+        font-size: 1.1rem;
     }
     
-    .categoria-summary h3 {
+    .accordion-input:checked + .categoria-summary + .categoria-content {
+        padding: 1.2rem;
+    }
+    
+    .categoria-content li {
+        padding: 0.6rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+    
+    .contador {
+        align-self: flex-end;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .distribuicao h2 {
+        font-size: 1.5rem;
+    }
+    
+    .categoria-accordion .categoria-summary h3 {
         font-size: 1rem;
     }
     
-    .categoria-details[open] .categoria-content {
-        padding: 1rem;
-    }
-    
-    .categorias-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+    .categoria-content {
+        font-size: 0.9rem;
     }
 }

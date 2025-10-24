@@ -1,83 +1,210 @@
-<!-- Distribuição por Categoria - Versão Melhorada -->
-<section class="distribuicao">
-    <h2>📊 Distribuição Geral</h2>
-    <div class="categorias-grid">
-        <!-- Cultivos -->
-        <details class="categoria-details" name="accordionGroup">
-            <summary class="categoria-summary">
-                <h3>🌾 Cultivos</h3>
-                <span class="toggle-icon">▼</span>
-            </summary>
-            <div class="categoria-content">
-                {% if totais.cultivos %}
-                    <ul>
-                        {% for cultivo, quantidade in totais.cultivos.items() %}
-                        <li>{{ cultivo }}: <strong>{{ quantidade }}</strong> registro(s)</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="sem-dados">Nenhum dado disponível</p>
-                {% endif %}
-            </div>
-        </details>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estatísticas - InteliAgro</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Estatísticas</h1>
+            <a href="{{ url_for('index') }}" class="btn btn-voltar">← Voltar para Início</a>
+        </header>
 
-        <!-- Pragas -->
-        <details class="categoria-details" name="accordionGroup">
-            <summary class="categoria-summary">
-                <h3>🐛 Pragas (Únicas)</h3>
-                <span class="toggle-icon">▼</span>
-            </summary>
-            <div class="categoria-content">
-                {% if totais.pragas_unicas %}
-                    <ul>
-                        {% for praga, quantidade in totais.pragas_unicas.items() %}
-                        <li>{{ praga }}: <strong>{{ quantidade }}</strong> ocorrência(s)</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="sem-dados">Nenhum dado disponível</p>
-                {% endif %}
-            </div>
-        </details>
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Início</a>
+            <a href="{{ url_for('cadastro') }}">Cadastro</a>
+            <a href="{{ url_for('consulta') }}">Consulta</a>
+            <a href="{{ url_for('estatisticas') }}" class="active">Estatísticas</a>
+        </nav>
 
-        <!-- Defensivos -->
-        <details class="categoria-details" name="accordionGroup">
-            <summary class="categoria-summary">
-                <h3>🧪 Defensivos (Únicos)</h3>
-                <span class="toggle-icon">▼</span>
-            </summary>
-            <div class="categoria-content">
-                {% if totais.defensivos_unicos %}
-                    <ul>
-                        {% for defensivo, quantidade in totais.defensivos_unicos.items() %}
-                        <li>{{ defensivo }}: <strong>{{ quantidade }}</strong> uso(s)</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="sem-dados">Nenhum dado disponível</p>
-                {% endif %}
-            </div>
-        </details>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-        <!-- Cidades -->
-        <details class="categoria-details" name="accordionGroup">
-            <summary class="categoria-summary">
-                <h3>🏙️ Cidades</h3>
-                <span class="toggle-icon">▼</span>
-            </summary>
-            <div class="categoria-content">
-                {% if totais.cidades %}
-                    <ul>
-                        {% for cidade, quantidade in totais.cidades.items() %}
-                        <li>{{ cidade }}: <strong>{{ quantidade }}</strong> registro(s)</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="sem-dados">Nenhum dado disponível</p>
-                {% endif %}
+        <!-- Cards de Estatísticas -->
+        <div class="cards-estatisticas">
+            <div class="card-estatistica">
+                <h3>Total de Registros</h3>
+                <div class="numero">{{ totais.total_registros or 0 }}</div>
             </div>
-        </details>
+            <div class="card-estatistica">
+                <h3>Total de Hectares</h3>
+                <div class="numero">{{ "%.2f"|format(totais.total_hectares|float) if totais.total_hectares else '0.00' }} ha</div>
+            </div>
+            <div class="card-estatistica">
+                <h3>Cultivos Diferentes</h3>
+                <div class="numero">{{ totais.cultivos|length if totais.cultivos else 0 }}</div>
+            </div>
+            <div class="card-estatistica">
+                <h3>Pragas Diferentes</h3>
+                <div class="numero">{{ totais.pragas_unicas|length if totais.pragas_unicas else 0 }}</div>
+            </div>
+        </div>
+
+        <!-- Distribuição por Categoria com Accordion Exclusivo -->
+        <section class="distribuicao">
+            <h2>📊 Distribuição Geral</h2>
+            <div class="categorias-grid" id="accordionGroup">
+                
+                <!-- Cultivos -->
+                <div class="categoria-accordion">
+                    <input type="radio" name="accordion" id="accordion-cultivos" class="accordion-input">
+                    <label for="accordion-cultivos" class="categoria-summary">
+                        <h3>
+                            🌾 Cultivos
+                            {% if totais.cultivos %}
+                            <span class="contador">{{ totais.cultivos.values()|sum }}</span>
+                            {% endif %}
+                        </h3>
+                        <span class="toggle-icon">▼</span>
+                    </label>
+                    <div class="categoria-content">
+                        {% if totais.cultivos %}
+                            <ul>
+                                {% for cultivo, quantidade in totais.cultivos.items() %}
+                                <li>
+                                    <span>{{ cultivo }}</span>
+                                    <strong>{{ quantidade }} registro(s)</strong>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="sem-dados">Nenhum cultivo cadastrado</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Pragas -->
+                <div class="categoria-accordion">
+                    <input type="radio" name="accordion" id="accordion-pragas" class="accordion-input">
+                    <label for="accordion-pragas" class="categoria-summary">
+                        <h3>
+                            🐛 Pragas Únicas
+                            {% if totais.pragas_unicas %}
+                            <span class="contador">{{ totais.pragas_unicas.values()|sum }}</span>
+                            {% endif %}
+                        </h3>
+                        <span class="toggle-icon">▼</span>
+                    </label>
+                    <div class="categoria-content">
+                        {% if totais.pragas_unicas %}
+                            <ul>
+                                {% for praga, quantidade in totais.pragas_unicas.items() %}
+                                <li>
+                                    <span>{{ praga }}</span>
+                                    <strong>{{ quantidade }} ocorrência(s)</strong>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="sem-dados">Nenhuma praga registrada</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Defensivos -->
+                <div class="categoria-accordion">
+                    <input type="radio" name="accordion" id="accordion-defensivos" class="accordion-input">
+                    <label for="accordion-defensivos" class="categoria-summary">
+                        <h3>
+                            🧪 Defensivos Únicos
+                            {% if totais.defensivos_unicos %}
+                            <span class="contador">{{ totais.defensivos_unicos.values()|sum }}</span>
+                            {% endif %}
+                        </h3>
+                        <span class="toggle-icon">▼</span>
+                    </label>
+                    <div class="categoria-content">
+                        {% if totais.defensivos_unicos %}
+                            <ul>
+                                {% for defensivo, quantidade in totais.defensivos_unicos.items() %}
+                                <li>
+                                    <span>{{ defensivo }}</span>
+                                    <strong>{{ quantidade }} uso(s)</strong>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="sem-dados">Nenhum defensivo registrado</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Cidades -->
+                <div class="categoria-accordion">
+                    <input type="radio" name="accordion" id="accordion-cidades" class="accordion-input">
+                    <label for="accordion-cidades" class="categoria-summary">
+                        <h3>
+                            🏙️ Cidades
+                            {% if totais.cidades %}
+                            <span class="contador">{{ totais.cidades.values()|sum }}</span>
+                            {% endif %}
+                        </h3>
+                        <span class="toggle-icon">▼</span>
+                    </label>
+                    <div class="categoria-content">
+                        {% if totais.cidades %}
+                            <ul>
+                                {% for cidade, quantidade in totais.cidades.items() %}
+                                <li>
+                                    <span>{{ cidade }}</span>
+                                    <strong>{{ quantidade }} registro(s)</strong>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="sem-dados">Nenhuma cidade cadastrada</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </section>
     </div>
-</section>
-<!-- Fim da Distribuição por Categoria -->
- 
+
+    <script>
+        // JavaScript para controle do accordion exclusivo
+        document.addEventListener('DOMContentLoaded', function() {
+            const accordionInputs = document.querySelectorAll('.accordion-input');
+            
+            accordionInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    // Se este input foi desmarcado, não faz nada
+                    if (!this.checked) return;
+                    
+                    // Atualiza visualmente todos os accordions
+                    accordionInputs.forEach(otherInput => {
+                        const content = otherInput.nextElementSibling.nextElementSibling;
+                        const icon = otherInput.nextElementSibling.querySelector('.toggle-icon');
+                        
+                        if (otherInput === this) {
+                            // Accordion aberto
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                            icon.style.transform = 'rotate(180deg)';
+                        } else {
+                            // Accordion fechado
+                            content.style.maxHeight = '0';
+                            icon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                });
+            });
+            
+            // Inicializar: fechar todos os accordions
+            accordionInputs.forEach(input => {
+                const content = input.nextElementSibling.nextElementSibling;
+                const icon = input.nextElementSibling.querySelector('.toggle-icon');
+                content.style.maxHeight = '0';
+                icon.style.transform = 'rotate(0deg)';
+            });
+        });
+    </script>
+</body>
+</html>
