@@ -214,30 +214,33 @@ def cadastro():
 
 @app.route('/consulta')
 def consulta():
-    """Página de consulta de dados"""
-    df = ler_dados()
+    filtro_cultivo = request.args.get('filtro_cultivo', '')
+    filtro_praga = request.args.get('filtro_praga', '')
     
-    # Filtros
-    filtro_cultivo = request.args.get('filtro_cultivo', '').strip()
-    filtro_praga = request.args.get('filtro_praga', '').strip()
+    query = "SELECT * FROM registros_agricolas WHERE 1=1"
+    params = []
     
-    if not df.empty:
-        # Preencher valores NaN com string vazia
-        df = df.fillna({'cultivo': '', 'praga': ''})
-        
-        # Aplicar filtros case-insensitive
-        if filtro_cultivo:
-            df = df[df['cultivo'].str.lower().str.contains(filtro_cultivo.lower(), na=False)]
-        if filtro_praga:
-            df = df[df['praga'].str.lower().str.contains(filtro_praga.lower(), na=False)]
+    if filtro_cultivo:
+        query += " AND cultivo LIKE ?"
+        params.append(f'%{filtro_cultivo}%')
     
-    # Converter para lista de dicionários para exibição
-    dados = df.to_dict('records') if not df.empty else []
+    if filtro_praga:
+        query += " AND praga LIKE ?"
+        params.append(f'%{filtro_praga}%')
+    
+    query += " ORDER BY data_cadastro DESC"
+    
+    conn = sqlite3.connect('agricultura.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(query, params)
+    dados = cursor.fetchall()
+    conn.close()
     
     return render_template('consulta.html', 
-                         dados=dados, 
-                         filtro_cultivo=filtro_cultivo, 
-                         filtro_cidade=filtro_praga)
+                         dados=dados,
+                         filtro_cultivo=filtro_cultivo,
+                         filtro_praga=filtro_praga)
 
 
 @app.route('/estatisticas')

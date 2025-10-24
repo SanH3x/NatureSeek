@@ -1,193 +1,83 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estatísticas - InteliAgro</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1.2">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>📊 Estatísticas Agrícolas</h1>
-            <a href="{{ url_for('index') }}" class="btn-voltar">← Voltar</a>
-        </header>
+<!-- Distribuição por Categoria - Versão Melhorada -->
+<section class="distribuicao">
+    <h2>📊 Distribuição Geral</h2>
+    <div class="categorias-grid">
+        <!-- Cultivos -->
+        <details class="categoria-details" name="accordionGroup">
+            <summary class="categoria-summary">
+                <h3>🌾 Cultivos</h3>
+                <span class="toggle-icon">▼</span>
+            </summary>
+            <div class="categoria-content">
+                {% if totais.cultivos %}
+                    <ul>
+                        {% for cultivo, quantidade in totais.cultivos.items() %}
+                        <li>{{ cultivo }}: <strong>{{ quantidade }}</strong> registro(s)</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="sem-dados">Nenhum dado disponível</p>
+                {% endif %}
+            </div>
+        </details>
 
-        <nav class="menu">
-            <a href="{{ url_for('index') }}">Início</a>
-            <a href="{{ url_for('cadastro') }}">Cadastro</a>
-            <a href="{{ url_for('consulta') }}">Consulta</a>
-            <a href="{{ url_for('estatisticas') }}" class="active">Estatísticas</a>
-        </nav>
+        <!-- Pragas -->
+        <details class="categoria-details" name="accordionGroup">
+            <summary class="categoria-summary">
+                <h3>🐛 Pragas (Únicas)</h3>
+                <span class="toggle-icon">▼</span>
+            </summary>
+            <div class="categoria-content">
+                {% if totais.pragas_unicas %}
+                    <ul>
+                        {% for praga, quantidade in totais.pragas_unicas.items() %}
+                        <li>{{ praga }}: <strong>{{ quantidade }}</strong> ocorrência(s)</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="sem-dados">Nenhum dado disponível</p>
+                {% endif %}
+            </div>
+        </details>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        <!-- Defensivos -->
+        <details class="categoria-details" name="accordionGroup">
+            <summary class="categoria-summary">
+                <h3>🧪 Defensivos (Únicos)</h3>
+                <span class="toggle-icon">▼</span>
+            </summary>
+            <div class="categoria-content">
+                {% if totais.defensivos_unicos %}
+                    <ul>
+                        {% for defensivo, quantidade in totais.defensivos_unicos.items() %}
+                        <li>{{ defensivo }}: <strong>{{ quantidade }}</strong> uso(s)</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="sem-dados">Nenhum dado disponível</p>
+                {% endif %}
+            </div>
+        </details>
 
-        {% if mensagem %}
-            <div class="alert alert-info">{{ mensagem }}</div>
-        {% endif %}
-
-        <main>
-            {% if estatisticas %}
-            <!-- Estatísticas Gerais -->
-            <section class="estatisticas-gerais">
-                <h2>📈 Estatísticas Gerais</h2>
-                <div class="cards-estatisticas">
-                    <div class="card-estatistica">
-                        <h3>Total de Registros</h3>
-                        <p class="numero">{{ estatisticas.total_registros }}</p>
-                    </div>
-                    <div class="card-estatistica">
-                        <h3>Área Total (ha)</h3>
-                        <p class="numero">{{ "%.2f"|format(estatisticas.total_hectares) }}</p>
-                    </div>
-                    <div class="card-estatistica">
-                        <h3>Média por Área (ha)</h3>
-                        <p class="numero">{{ "%.2f"|format(estatisticas.media_hectares) }}</p>
-                    </div>
-                    <div class="card-estatistica">
-                        <h3>Total de Cultivos</h3>
-                        <p class="numero">{{ estatisticas.total_cultivos }}</p>
-                    </div>
-                    <div class="card-estatistica">
-                        <h3>Total de Pragas</h3>
-                        <p class="numero">{{ estatisticas.total_pragas }}</p>
-                    </div>
-                    <div class="card-estatistica">
-                        <h3>Total de Defensivos</h3>
-                        <p class="numero">{{ estatisticas.total_defensivos }}</p>
-                    </div>
-                </div>
-            </section>
-
-
-            <!-- Distribuição por Categoria -->
-            <section class="distribuicao">
-                <h2>📊 Distribuição Geral</h2>
-                <div class="categorias-grid">
-                    <div class="categoria-expansivel">
-                        <div class="categoria-header" onclick="toggleCategoria('cultivos')">
-                            <h3>🌾 Cultivos</h3>
-                            <span class="toggle-icon">▼</span>
-                        </div>
-                        <div id="cultivos" class="categoria-content">
-                            {% if totais.cultivos %}
-                                <ul>
-                                    {% for cultivo, quantidade in totais.cultivos.items() %}
-                                    <li>{{ cultivo }}: <strong>{{ quantidade }}</strong> registro(s)</li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                <p class="sem-dados">Nenhum dado disponível</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="categoria-expansivel">
-                        <div class="categoria-header" onclick="toggleCategoria('pragas')">
-                            <h3>🐛 Pragas (Únicas)</h3>
-                            <span class="toggle-icon">▼</span>
-                        </div>
-                        <div id="pragas" class="categoria-content">
-                            {% if totais.pragas_unicas %}
-                                <ul>
-                                    {% for praga, quantidade in totais.pragas_unicas.items() %}
-                                    <li>{{ praga }}: <strong>{{ quantidade }}</strong> ocorrência(s)</li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                <p class="sem-dados">Nenhum dado disponível</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="categoria-expansivel">
-                        <div class="categoria-header" onclick="toggleCategoria('defensivos')">
-                            <h3>🧪 Defensivos (Únicos)</h3>
-                            <span class="toggle-icon">▼</span>
-                        </div>
-                        <div id="defensivos" class="categoria-content">
-                            {% if totais.defensivos_unicos %}
-                                <ul>
-                                    {% for defensivo, quantidade in totais.defensivos_unicos.items() %}
-                                    <li>{{ defensivo }}: <strong>{{ quantidade }}</strong> uso(s)</li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                <p class="sem-dados">Nenhum dado disponível</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="categoria-expansivel">
-                        <div class="categoria-header" onclick="toggleCategoria('cidades')">
-                            <h3>🏙️ Cidades</h3>
-                            <span class="toggle-icon">▼</span>
-                        </div>
-                        <div id="cidades" class="categoria-content">
-                            {% if totais.cidades %}
-                                <ul>
-                                    {% for cidade, quantidade in totais.cidades.items() %}
-                                    <li>{{ cidade }}: <strong>{{ quantidade }}</strong> registro(s)</li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                <p class="sem-dados">Nenhum dado disponível</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </section>
-            {% endif %}
-        </main>
+        <!-- Cidades -->
+        <details class="categoria-details" name="accordionGroup">
+            <summary class="categoria-summary">
+                <h3>🏙️ Cidades</h3>
+                <span class="toggle-icon">▼</span>
+            </summary>
+            <div class="categoria-content">
+                {% if totais.cidades %}
+                    <ul>
+                        {% for cidade, quantidade in totais.cidades.items() %}
+                        <li>{{ cidade }}: <strong>{{ quantidade }}</strong> registro(s)</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="sem-dados">Nenhum dado disponível</p>
+                {% endif %}
+            </div>
+        </details>
     </div>
-
-<script>
-    let categoriaAberta = null;
-
-    function toggleCategoria(id) {
-        const content = document.getElementById(id);
-        const icon = content.previousElementSibling.querySelector('.toggle-icon');
-        
-        // Se já existe uma categoria aberta, fecha ela
-        if (categoriaAberta && categoriaAberta !== content) {
-            const iconAnterior = categoriaAberta.previousElementSibling.querySelector('.toggle-icon');
-            categoriaAberta.style.maxHeight = '0px';
-            categoriaAberta.style.padding = '0';
-            iconAnterior.textContent = '▼';
-        }
-        
-        // Alterna a categoria clicada
-        if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-            // Se está aberta, fecha
-            content.style.maxHeight = '0px';
-            content.style.padding = '0';
-            icon.textContent = '▼';
-            categoriaAberta = null;
-        } else {
-            // Se está fechada, abre
-            content.style.maxHeight = content.scrollHeight + 'px';
-            content.style.padding = '1.5rem';
-            icon.textContent = '▲';
-            categoriaAberta = content;
-        }
-    }
-
-    // Inicializa todas as categorias como fechadas ao carregar a página
-    document.addEventListener("DOMContentLoaded", function() {
-        const categorias = document.querySelectorAll(".categoria-content");
-        
-        categorias.forEach(categoria => {
-            categoria.style.maxHeight = "0px";
-            categoria.style.padding = "0";
-        });
-        
-        categoriaAberta = null;
-    });
-</script>
-</html>
+</section>
+<!-- Fim da Distribuição por Categoria -->
+ 
