@@ -147,30 +147,47 @@
         </main>
     </div>
 
-    <script>
-        function toggleCategoria(id) {
-            const content = document.getElementById(id);
-            const icon = content.previousElementSibling.querySelector('.toggle-icon');
-            
-            if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-                content.style.maxHeight = '0px';
-                content.style.padding = '0';
-                icon.textContent = '▼';
-            } else {
-                content.style.maxHeight = content.scrollHeight + 'px';
-                content.style.padding = '1.5rem';
-                icon.textContent = '▲';
-            }
-        }
+<script>
+    let categoriaAberta = null;
 
-        // Inicializar todas as categorias como fechadas
-        document.addEventListener('DOMContentLoaded', function() {
-            const categorias = document.querySelectorAll('.categoria-content');
-            categorias.forEach(categoria => {
-                categoria.style.maxHeight = '0px';
-                categoria.style.padding = '0';
-            });
+    function toggleCategoria(id) {
+        const content = document.getElementById(id);
+        const icon = content.previousElementSibling.querySelector('.toggle-icon');
+        
+        // Se já existe uma categoria aberta, fecha ela
+        if (categoriaAberta && categoriaAberta !== content) {
+            const iconAnterior = categoriaAberta.previousElementSibling.querySelector('.toggle-icon');
+            categoriaAberta.style.maxHeight = '0px';
+            categoriaAberta.style.padding = '0';
+            iconAnterior.textContent = '▼';
+        }
+        
+        // Alterna a categoria clicada
+        if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+            // Se está aberta, fecha
+            content.style.maxHeight = '0px';
+            content.style.padding = '0';
+            icon.textContent = '▼';
+            categoriaAberta = null;
+        } else {
+            // Se está fechada, abre
+            content.style.maxHeight = content.scrollHeight + 'px';
+            content.style.padding = '1.5rem';
+            icon.textContent = '▲';
+            categoriaAberta = content;
+        }
+    }
+
+    // Inicializa todas as categorias como fechadas ao carregar a página
+    document.addEventListener("DOMContentLoaded", function() {
+        const categorias = document.querySelectorAll(".categoria-content");
+        
+        categorias.forEach(categoria => {
+            categoria.style.maxHeight = "0px";
+            categoria.style.padding = "0";
         });
-    </script>
-</body>
+        
+        categoriaAberta = null;
+    });
+</script>
 </html>

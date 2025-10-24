@@ -293,7 +293,7 @@ input:focus, select:focus, textarea:focus {
     padding: 0;
     max-height: 0;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
 .categoria-content.active {
