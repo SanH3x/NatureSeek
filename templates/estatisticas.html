@@ -51,7 +51,7 @@
         <!-- Distribuição por Categoria com Accordion Exclusivo -->
         <section class="distribuicao">
             <h2>📊 Distribuição Geral</h2>
-            <div class="categorias-grid" id="accordionGroup">
+            <div class="categorias-grid">
                 
                 <!-- Cultivos -->
                 <div class="categoria-accordion">
@@ -168,43 +168,5 @@
             </div>
         </section>
     </div>
-
-    <script>
-        // JavaScript para controle do accordion exclusivo
-        document.addEventListener('DOMContentLoaded', function() {
-            const accordionInputs = document.querySelectorAll('.accordion-input');
-            
-            accordionInputs.forEach(input => {
-                input.addEventListener('change', function() {
-                    // Se este input foi desmarcado, não faz nada
-                    if (!this.checked) return;
-                    
-                    // Atualiza visualmente todos os accordions
-                    accordionInputs.forEach(otherInput => {
-                        const content = otherInput.nextElementSibling.nextElementSibling;
-                        const icon = otherInput.nextElementSibling.querySelector('.toggle-icon');
-                        
-                        if (otherInput === this) {
-                            // Accordion aberto
-                            content.style.maxHeight = content.scrollHeight + 'px';
-                            icon.style.transform = 'rotate(180deg)';
-                        } else {
-                            // Accordion fechado
-                            content.style.maxHeight = '0';
-                            icon.style.transform = 'rotate(0deg)';
-                        }
-                    });
-                });
-            });
-            
-            // Inicializar: fechar todos os accordions
-            accordionInputs.forEach(input => {
-                const content = input.nextElementSibling.nextElementSibling;
-                const icon = input.nextElementSibling.querySelector('.toggle-icon');
-                content.style.maxHeight = '0';
-                icon.style.transform = 'rotate(0deg)';
-            });
-        });
-    </script>
 </body>
 </html>
