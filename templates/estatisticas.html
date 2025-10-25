@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>📊 Estatísticas</h1>
+            <h1>📊 Estatísticas Detalhadas</h1>
             <a href="{{ url_for('index') }}" class="btn btn-voltar">← Voltar para Início</a>
         </header>
 
@@ -28,7 +28,7 @@
             {% endif %}
         {% endwith %}
 
-        <!-- Cards de Estatísticas -->
+        <!-- Cards de Estatísticas Gerais -->
         <div class="cards-estatisticas">
             <div class="card-estatistica">
                 <h3>Total de Registros</h3>
@@ -39,39 +39,113 @@
                 <div class="numero">{{ "%.2f"|format(totais.total_hectares|float) if totais.total_hectares else '0.00' }} ha</div>
             </div>
             <div class="card-estatistica">
-                <h3>Cultivos Diferentes</h3>
-                <div class="numero">{{ totais.cultivos|length if totais.cultivos else 0 }}</div>
+                <h3>Termos de Pragas</h3>
+                <div class="numero">{{ totais.estatisticas_multiplos.total_termos_pragas if totais.estatisticas_multiplos else 0 }}</div>
             </div>
             <div class="card-estatistica">
-                <h3>Pragas Diferentes</h3>
-                <div class="numero">{{ totais.pragas_unicas|length if totais.pragas_unicas else 0 }}</div>
+                <h3>Termos de Defensivos</h3>
+                <div class="numero">{{ totais.estatisticas_multiplos.total_termos_defensivos if totais.estatisticas_multiplos else 0 }}</div>
             </div>
         </div>
 
-        <!-- Distribuição por Categoria com Accordion Exclusivo -->
+        <!-- Estatísticas de Múltiplos Termos -->
+        {% if totais.estatisticas_multiplos %}
+        <div class="cards-estatisticas">
+            <div class="card-estatistica">
+                <h3>Média de Pragas/Registro</h3>
+                <div class="numero">{{ totais.estatisticas_multiplos.media_pragas_por_registro }}</div>
+            </div>
+            <div class="card-estatistica">
+                <h3>Média de Defensivos/Registro</h3>
+                <div class="numero">{{ totais.estatisticas_multiplos.media_defensivos_por_registro }}</div>
+            </div>
+            <div class="card-estatistica">
+                <h3>Pragas Únicas</h3>
+                <div class="numero">{{ totais.frequencia_pragas|length if totais.frequencia_pragas else 0 }}</div>
+            </div>
+            <div class="card-estatistica">
+                <h3>Defensivos Únicos</h3>
+                <div class="numero">{{ totais.frequencia_defensivos|length if totais.frequencia_defensivos else 0 }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Resumo Estatístico -->
+        <section class="resumo-estatistico">
+            <h2>📋 Resumo Geral</h2>
+            <div class="resumo-grid">
+                <div class="resumo-item">
+                    <h4>🌾 Cultivo Mais Frequente</h4>
+                    <p>
+                        {% if totais.frequencia_cultivos %}
+                            {% set top_cultivo = totais.frequencia_cultivos.items()|first %}
+                            <strong>{{ top_cultivo[0] }}</strong> - {{ top_cultivo[1].frequencia }} ocorrências ({{ top_cultivo[1].percentual }}%)
+                        {% else %}
+                            Nenhum dado disponível
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="resumo-item">
+                    <h4>🐛 Praga Mais Comum</h4>
+                    <p>
+                        {% if totais.frequencia_pragas %}
+                            {% set top_praga = totais.frequencia_pragas.items()|first %}
+                            <strong>{{ top_praga[0] }}</strong> - {{ top_praga[1].frequencia }} ocorrências ({{ top_praga[1].percentual }}%)
+                        {% else %}
+                            Nenhum dado disponível
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="resumo-item">
+                    <h4>🧪 Defensivo Mais Usado</h4>
+                    <p>
+                        {% if totais.frequencia_defensivos %}
+                            {% set top_defensivo = totais.frequencia_defensivos.items()|first %}
+                            <strong>{{ top_defensivo[0] }}</strong> - {{ top_defensivo[1].frequencia }} usos ({{ top_defensivo[1].percentual }}%)
+                        {% else %}
+                            Nenhum dado disponível
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="resumo-item">
+                    <h4>🏙️ Cidade com Mais Registros</h4>
+                    <p>
+                        {% if totais.frequencia_cidades %}
+                            {% set top_cidade = totais.frequencia_cidades.items()|first %}
+                            <strong>{{ top_cidade[0] }}</strong> - {{ top_cidade[1].frequencia }} registros ({{ top_cidade[1].percentual }}%)
+                        {% else %}
+                            Nenhum dado disponível
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Distribuição por Categoria - BOXES FIXAS -->
         <section class="distribuicao">
-            <h2>📊 Distribuição Geral</h2>
+            <h2>📈 Frequência por Categoria</h2>
             <div class="categorias-grid">
                 
-                <!-- Cultivos -->
-                <div class="categoria-accordion">
-                    <input type="radio" name="accordion" id="accordion-cultivos" class="accordion-input">
-                    <label for="accordion-cultivos" class="categoria-summary">
+                <!-- Frequência de Cultivos -->
+                <div class="categoria-box">
+                    <div class="categoria-header">
                         <h3>
                             🌾 Cultivos
-                            {% if totais.cultivos %}
-                            <span class="contador">{{ totais.cultivos.values()|sum }}</span>
-                            {% endif %}
+                            <span class="contador">
+                                {{ totais.frequencia_cultivos.values()|map(attribute='frequencia')|sum if totais.frequencia_cultivos else 0 }}
+                            </span>
                         </h3>
-                        <span class="toggle-icon">▼</span>
-                    </label>
+                    </div>
                     <div class="categoria-content">
-                        {% if totais.cultivos %}
-                            <ul>
-                                {% for cultivo, quantidade in totais.cultivos.items() %}
+                        {% if totais.frequencia_cultivos %}
+                            <ul class="lista-frequencia">
+                                {% for cultivo, dados in totais.frequencia_cultivos.items() %}
                                 <li>
-                                    <span>{{ cultivo }}</span>
-                                    <strong>{{ quantidade }} registro(s)</strong>
+                                    <span class="item-nome">{{ cultivo }}</span>
+                                    <span class="item-frequencia">
+                                        {{ dados.frequencia }} ocorrência(s)
+                                        <small>({{ dados.percentual }}%)</small>
+                                    </span>
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -81,81 +155,84 @@
                     </div>
                 </div>
 
-                <!-- Pragas -->
-                <div class="categoria-accordion">
-                    <input type="radio" name="accordion" id="accordion-pragas" class="accordion-input">
-                    <label for="accordion-pragas" class="categoria-summary">
+                <!-- Frequência de Pragas -->
+                <div class="categoria-box">
+                    <div class="categoria-header">
                         <h3>
-                            🐛 Pragas Únicas
-                            {% if totais.pragas_unicas %}
-                            <span class="contador">{{ totais.pragas_unicas.values()|sum }}</span>
-                            {% endif %}
+                            🐛 Pragas
+                            <span class="contador">
+                                {{ totais.frequencia_pragas.values()|map(attribute='frequencia')|sum if totais.frequencia_pragas else 0 }}
+                            </span>
                         </h3>
-                        <span class="toggle-icon">▼</span>
-                    </label>
+                    </div>
                     <div class="categoria-content">
-                        {% if totais.pragas_unicas %}
-                            <ul>
-                                {% for praga, quantidade in totais.pragas_unicas.items() %}
+                        {% if totais.frequencia_pragas %}
+                            <ul class="lista-frequencia">
+                                {% for praga, dados in totais.frequencia_pragas.items() %}
                                 <li>
-                                    <span>{{ praga }}</span>
-                                    <strong>{{ quantidade }} ocorrência(s)</strong>
+                                    <span class="item-nome">{{ praga }}</span>
+                                    <span class="item-frequencia">
+                                        {{ dados.frequencia }} ocorrência(s)
+                                        <small>({{ dados.percentual }}%)</small>
+                                    </span>
                                 </li>
                                 {% endfor %}
                             </ul>
                         {% else %}
-                            <p class="sem-dados">Nenhuma praga registrada</p>
+                            <p class="sem-dados">Nenhuma praga cadastrada</p>
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- Defensivos -->
-                <div class="categoria-accordion">
-                    <input type="radio" name="accordion" id="accordion-defensivos" class="accordion-input">
-                    <label for="accordion-defensivos" class="categoria-summary">
+                <!-- Frequência de Defensivos -->
+                <div class="categoria-box">
+                    <div class="categoria-header">
                         <h3>
-                            🧪 Defensivos Únicos
-                            {% if totais.defensivos_unicos %}
-                            <span class="contador">{{ totais.defensivos_unicos.values()|sum }}</span>
-                            {% endif %}
+                            🧪 Defensivos
+                            <span class="contador">
+                                {{ totais.frequencia_defensivos.values()|map(attribute='frequencia')|sum if totais.frequencia_defensivos else 0 }}
+                            </span>
                         </h3>
-                        <span class="toggle-icon">▼</span>
-                    </label>
+                    </div>
                     <div class="categoria-content">
-                        {% if totais.defensivos_unicos %}
-                            <ul>
-                                {% for defensivo, quantidade in totais.defensivos_unicos.items() %}
+                        {% if totais.frequencia_defensivos %}
+                            <ul class="lista-frequencia">
+                                {% for defensivo, dados in totais.frequencia_defensivos.items() %}
                                 <li>
-                                    <span>{{ defensivo }}</span>
-                                    <strong>{{ quantidade }} uso(s)</strong>
+                                    <span class="item-nome">{{ defensivo }}</span>
+                                    <span class="item-frequencia">
+                                        {{ dados.frequencia }} uso(s)
+                                        <small>({{ dados.percentual }}%)</small>
+                                    </span>
                                 </li>
                                 {% endfor %}
                             </ul>
                         {% else %}
-                            <p class="sem-dados">Nenhum defensivo registrado</p>
+                            <p class="sem-dados">Nenhum defensivo cadastrado</p>
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- Cidades -->
-                <div class="categoria-accordion">
-                    <input type="radio" name="accordion" id="accordion-cidades" class="accordion-input">
-                    <label for="accordion-cidades" class="categoria-summary">
+                <!-- Frequência de Cidades -->
+                <div class="categoria-box">
+                    <div class="categoria-header">
                         <h3>
                             🏙️ Cidades
-                            {% if totais.cidades %}
-                            <span class="contador">{{ totais.cidades.values()|sum }}</span>
-                            {% endif %}
+                            <span class="contador">
+                                {{ totais.frequencia_cidades.values()|map(attribute='frequencia')|sum if totais.frequencia_cidades else 0 }}
+                            </span>
                         </h3>
-                        <span class="toggle-icon">▼</span>
-                    </label>
+                    </div>
                     <div class="categoria-content">
-                        {% if totais.cidades %}
-                            <ul>
-                                {% for cidade, quantidade in totais.cidades.items() %}
+                        {% if totais.frequencia_cidades %}
+                            <ul class="lista-frequencia">
+                                {% for cidade, dados in totais.frequencia_cidades.items() %}
                                 <li>
-                                    <span>{{ cidade }}</span>
-                                    <strong>{{ quantidade }} registro(s)</strong>
+                                    <span class="item-nome">{{ cidade }}</span>
+                                    <span class="item-frequencia">
+                                        {{ dados.frequencia }} registro(s)
+                                        <small>({{ dados.percentual }}%)</small>
+                                    </span>
                                 </li>
                                 {% endfor %}
                             </ul>

@@ -47,10 +47,18 @@
 
                 <div class="filtro-group">
                     <button type="submit" class="btn btn-primary">Filtrar</button>
-                    <a href="{{ url_for('consulta') }}" class="btn btn-secondary">Limpar</a>
+                    <a href="{{ url_for('consulta') }}" class="btn btn-secondary">Limpar Filtros</a>
                 </div>
             </form>
         </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <!-- Tabela de dados -->
         <div class="tabela-container">
@@ -79,8 +87,8 @@
                             <td>{{ registro.praga }}</td>
                             <td>{{ "%.2f"|format(registro.hectares|float) }} ha</td>
                             <td>{{ registro.defensivo }}</td>
-                            <td>{{ registro.cidade_plantio }}</td>
-                            <td>{{ registro.data_cadastro.strftime('%d/%m/%Y') if registro.data_cadastro else 'N/A' }}</td>
+                            <td>{{ registro.cidade }}</td>
+                            <td>{{ registro.data_cadastro }}</td>
                             <td>
                                 <a href="{{ url_for('excluir', id=registro.id) }}" 
                                    class="btn-excluir" 
@@ -95,7 +103,7 @@
             </div>
             {% else %}
             <div class="sem-dados">
-                <p>❌ Nenhum registro encontrado com os filtros aplicados.</p>
+                <p>❌ Nenhum registro encontrado.</p>
                 {% if filtro_cultivo or filtro_praga or filtro_cidade %}
                 <p>Tente ajustar os termos de pesquisa ou <a href="{{ url_for('consulta') }}" class="btn btn-secondary">limpar os filtros</a>.</p>
                 {% else %}

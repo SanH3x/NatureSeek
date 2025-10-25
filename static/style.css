@@ -1,4 +1,4 @@
-/* style.css - Versão Corrigida com Accordion Exclusivo */
+/* style.css - Versão Otimizada com Boxes Fixas */
 * {
     margin: 0;
     padding: 0;
@@ -139,17 +139,27 @@ input:focus, select:focus, textarea:focus {
     text-decoration: none;
     font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
     margin-right: 0.5rem;
     margin-bottom: 0.5rem;
 }
 
 .btn:hover {
     background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-filtrar {
+    background: #2e7d32;
 }
 
 .btn-primary {
     background: #2e7d32;
+    display: block;
+    padding: 12px 24px;
+    font-size: 1em;
+    max-width: 100%;
 }
 
 .btn-primary:hover {
@@ -177,9 +187,11 @@ input:focus, select:focus, textarea:focus {
     color: #d32f2f;
     text-decoration: none;
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .btn-excluir:hover {
+    color: #b71c1c;
     text-decoration: underline;
 }
 
@@ -188,6 +200,18 @@ input:focus, select:focus, textarea:focus {
     padding: 1rem;
     border-radius: 5px;
     margin-bottom: 1rem;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .alert-success {
@@ -235,6 +259,10 @@ input:focus, select:focus, textarea:focus {
     color: #333;
 }
 
+.tabela-dados tr {
+    transition: background-color 0.3s ease;
+}
+
 .tabela-dados tr:hover {
     background: #f8f9fa;
 }
@@ -275,6 +303,11 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     text-align: center;
     border-top: 4px solid #4caf50;
+    transition: transform 0.3s ease;
+}
+
+.card-estatistica:hover {
+    transform: translateY(-3px);
 }
 
 .card-estatistica h3 {
@@ -310,122 +343,117 @@ input:focus, select:focus, textarea:focus {
     margin-top: 1.5rem;
 }
 
-/* REMOVIDAS AS REGRAS ANTIGAS DO ACCORDION */
-/* Substituídas pelas novas regras abaixo */
-
-/* NOVO ACCORDION EXCLUSIVO */
-.categoria-accordion {
+/* BOXES FIXAS PARA ESTATÍSTICAS */
+.categoria-box {
     background: white;
     border-radius: 12px;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     overflow: hidden;
-    transition: all 0.3s ease;
     border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    max-height: 500px;
 }
 
-.accordion-input {
-    display: none;
+.categoria-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
 }
 
-.categoria-accordion .categoria-summary {
+.categoria-header {
     padding: 1.5rem;
-    cursor: pointer;
+    background: linear-gradient(135deg, #2e7d32, #4caf50);
+    color: white;
+}
+
+.categoria-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.3rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    transition: all 0.3s ease;
-    margin: 0;
 }
 
-.categoria-accordion .categoria-summary:hover {
-    background: linear-gradient(135deg, #e8f5e8, #d4edda);
-}
-
-.accordion-input:checked + .categoria-summary {
-    background: linear-gradient(135deg, #2e7d32, #4caf50);
-}
-
-.accordion-input:checked + .categoria-summary h3 {
-    color: white;
-}
-
-.accordion-input:checked + .categoria-summary .toggle-icon {
-    color: white;
-    transform: rotate(180deg);
-}
-
-.categoria-accordion .categoria-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    padding: 0 1.5rem;
-}
-
-.accordion-input:checked + .categoria-summary + .categoria-content {
+.categoria-content {
     padding: 1.5rem;
-    max-height: 1000px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
 }
 
-/* Melhorias visuais para o accordion */
-.categoria-accordion .categoria-summary h3 {
-    margin: 0;
+/* Info sobre múltiplos termos */
+.info-multiplos {
+    background: #e8f5e8;
+    padding: 0.8rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    border-left: 4px solid #4caf50;
+}
+
+.info-multiplos small {
     color: #2e7d32;
-    font-size: 1.3rem;
-    transition: color 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    font-style: italic;
+    font-size: 0.85rem;
 }
 
-.categoria-accordion .toggle-icon {
-    font-size: 1rem;
-    color: #666;
-    transition: all 0.3s ease;
-    font-weight: bold;
-}
-
-/* Listas dentro do accordion */
-.categoria-content ul {
+/* Listas de frequência */
+.lista-frequencia {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.categoria-content li {
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #4caf50;
+.lista-frequencia li {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
     transition: all 0.3s ease;
 }
 
-.categoria-content li:hover {
+.lista-frequencia li:hover {
     background: #e8f5e8;
-    transform: translateX(5px);
+    border-color: #4caf50;
+    transform: translateX(2px);
 }
 
-.categoria-content li:last-child {
+.lista-frequencia li:last-child {
     margin-bottom: 0;
 }
 
+.item-nome {
+    font-weight: 600;
+    color: #333;
+    flex: 1;
+}
+
+.item-frequencia {
+    text-align: right;
+    color: #666;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.item-frequencia small {
+    color: #999;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
 .contador {
-    background: #4caf50;
+    background: rgba(255,255,255,0.3);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: bold;
-    margin-left: 0.5rem;
-}
-
-.accordion-input:checked + .categoria-summary .contador {
-    background: rgba(255,255,255,0.3);
 }
 
 /* Estados vazios */
@@ -437,6 +465,79 @@ input:focus, select:focus, textarea:focus {
     background: #f8f9fa;
     border-radius: 8px;
     border: 2px dashed #e0e0e0;
+}
+
+/* Resumo Estatístico */
+.resumo-estatistico {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.resumo-estatistico h2 {
+    color: #2e7d32;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+.resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.resumo-item {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #4caf50;
+    transition: transform 0.3s ease;
+}
+
+.resumo-item:hover {
+    transform: translateY(-2px);
+}
+
+.resumo-item h4 {
+    margin: 0 0 0.8rem 0;
+    color: #2e7d32;
+    font-size: 1.1rem;
+}
+
+.resumo-item p {
+    margin: 0;
+    color: #333;
+    line-height: 1.5;
+}
+
+.resumo-item strong {
+    color: #2e7d32;
+}
+
+/* Scrollbar personalizada */
+.categoria-content::-webkit-scrollbar,
+.lista-frequencia::-webkit-scrollbar {
+    width: 6px;
+}
+
+.categoria-content::-webkit-scrollbar-track,
+.lista-frequencia::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.categoria-content::-webkit-scrollbar-thumb,
+.lista-frequencia::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.categoria-content::-webkit-scrollbar-thumb:hover,
+.lista-frequencia::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
 /* Footer */
@@ -487,41 +588,104 @@ footer {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
     
-    .categoria-accordion .categoria-summary {
+    .categoria-header {
         padding: 1.2rem;
     }
     
-    .categoria-accordion .categoria-summary h3 {
+    .categoria-header h3 {
         font-size: 1.1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
     }
     
-    .accordion-input:checked + .categoria-summary + .categoria-content {
+    .categoria-content {
         padding: 1.2rem;
+        max-height: 300px;
     }
     
-    .categoria-content li {
+    .lista-frequencia li {
         padding: 0.6rem;
         flex-direction: column;
         align-items: flex-start;
         gap: 0.3rem;
     }
     
-    .contador {
+    .item-frequencia {
         align-self: flex-end;
-        margin-left: 0;
+    }
+    
+    .resumo-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .resumo-item {
+        padding: 1.2rem;
+    }
+    
+    .distribuicao h2 {
+        font-size: 1.5rem;
     }
 }
 
 @media (max-width: 480px) {
-    .distribuicao h2 {
-        font-size: 1.5rem;
+    header h1 {
+        font-size: 2rem;
     }
     
-    .categoria-accordion .categoria-summary h3 {
+    .categoria-header h3 {
         font-size: 1rem;
     }
     
     .categoria-content {
         font-size: 0.9rem;
     }
+    
+    .numero {
+        font-size: 1.5rem;
+    }
+    
+    .resumo-item h4 {
+        font-size: 1rem;
+    }
+}
+
+/* Animações suaves */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #4caf50;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
