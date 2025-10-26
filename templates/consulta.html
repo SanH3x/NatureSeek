@@ -76,7 +76,6 @@
                             <th>Defensivo</th>
                             <th>Cidade</th>
                             <th>Data Cadastro</th>
-                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -90,11 +89,6 @@
                             <td>{{ registro.cidade }}</td>
                             <td>{{ registro.data_cadastro }}</td>
                             <td>
-                                <a href="{{ url_for('excluir', id=registro.id) }}" 
-                                   class="btn-excluir" 
-                                   onclick="return confirm('Tem certeza que deseja excluir o registro #{{ registro.id }}?')">
-                                    🗑️ Excluir
-                                </a>
                             </td>
                         </tr>
                         {% endfor %}
